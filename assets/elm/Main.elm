@@ -60,7 +60,7 @@ view model =
                 [ div [ class "jumbotron" ]
                     [ h2 [] [ text ("Five Hundo") ]
                     , textarea [ rows 30, cols 100, onInput Change, placeholder "...what's up?" ] [ text model ]
-                    , p [] [ text model ]
+                    , p [] [ wordCountLabel model ]
                     ]
                 ]
             ]
@@ -95,3 +95,12 @@ isWord string =
 
         anything ->
             True
+
+
+
+-- HTTP
+
+
+encodeEntry : Model -> String
+encodeEntry model =
+  """{"entry" : \"""" ++ model ++ "\""

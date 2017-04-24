@@ -44,14 +44,13 @@ const config = {
   output: {
     path: path.join(__dirname, '..', 'priv', 'static', 'js'),
     filename: 'app.bundle.js',
-    publicPath: publicPath, 
+    publicPath: publicPath,
   },
   devServer: {
     hot: true,
     inline: true,
     overlay: true,
     port: 4002,
-    quiet: true,
     historyApiFallback: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
