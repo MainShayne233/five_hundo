@@ -51,6 +51,7 @@ const config = {
     inline: true,
     overlay: true,
     port: 4002,
+    quiet: true,
     historyApiFallback: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
