@@ -2,13 +2,13 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onInput)
 
 
 -- APP
 
 
-main : Program Never Int Msg
+main : Program Never Model Msg
 main =
     Html.beginnerProgram
         { model = model
@@ -22,12 +22,12 @@ main =
 
 
 type alias Model =
-    Int
+    String
 
 
-model : number
+model : String
 model =
-    0
+    ""
 
 
 
@@ -35,18 +35,14 @@ model =
 
 
 type Msg
-    = NoOp
-    | Increment
+    = Change String
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        NoOp ->
-            model
-
-        Increment ->
-            model + 1
+        Change text ->
+            text
 
 
 
@@ -58,12 +54,11 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
-        [ -- inline CSS (literal)
-          div [ class "row" ]
+        [ div [ class "row" ]
             [ div [ class "col-xs-12" ]
                 [ div [ class "jumbotron" ]
-                    [ h2 [] [ text ("Phoenix and Elm, hooray!") ]
-                    , p [] [ text "find me in assets/elm/Main.elm" ]
+                    [ h2 [] [ text ("Five Hundo") ]
+                    , textarea [ rows 30, cols 100, onInput Change, placeholder "...what's up?" ] [ text model ]
                     ]
                 ]
             ]
