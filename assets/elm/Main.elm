@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Regex
 
 
 -- APP
@@ -59,7 +60,38 @@ view model =
                 [ div [ class "jumbotron" ]
                     [ h2 [] [ text ("Five Hundo") ]
                     , textarea [ rows 30, cols 100, onInput Change, placeholder "...what's up?" ] [ text model ]
+                    , p [] [ text model ]
                     ]
                 ]
             ]
         ]
+
+
+wordCountLabel : String -> Html Msg
+wordCountLabel body =
+    [ wordCount body
+        |> toString
+    , " Words"
+    ]
+        |> String.concat
+        |> text
+
+
+wordCount : String -> Int
+wordCount body =
+    let
+        words =
+            Regex.split Regex.All (Regex.regex " |\n") body
+    in
+        List.filter isWord words
+            |> List.length
+
+
+isWord : String -> Bool
+isWord string =
+    case String.trim (string) of
+        "" ->
+            False
+
+        anything ->
+            True
