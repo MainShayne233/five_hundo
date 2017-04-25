@@ -1,5 +1,17 @@
 defmodule FiveHundo.DateTime do
 
+  def current_day_day do
+    {
+      { hours, minutes, seconds, meridian },
+      { year, month, day },
+    } = now()
+    meridian
+    |> case do
+      :AM ->
+        
+    end
+  end
+
   def now do
     timezone()
     |> Calendar.DateTime.now!
@@ -9,6 +21,11 @@ defmodule FiveHundo.DateTime do
   def timezone do
     :five_hundo
     |> Application.get_env(:timezone)
+  end
+
+  def cutoff_time do
+    :five_hundo
+    |> Application.get_env(:cutoff_time)
   end
 
   def format_datetime(%DateTime{
@@ -33,3 +50,5 @@ defmodule FiveHundo.DateTime do
     { hours, minutes, seconds, :AM }
   end
 end
+
+# mix phx.gen.model Entry entries text:text word_count:integer year:integer month:integer day:integer hours:integer minutes:integer seconds:integer meridiem
