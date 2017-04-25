@@ -6,17 +6,12 @@ import Html.Events exposing (onInput)
 import Regex
 import Http exposing (post, Body)
 import Json.Encode as Encode
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode)
+import RemoteData exposing (WebData)
 
 
 -- APP
--- main : Program Never Model Msg
--- main =
---     Html.beginnerProgram
---         { model = model
---         , view = view
---         , update = update
---         }
 
 
 main =
@@ -30,7 +25,7 @@ main =
 
 init =
     ( ""
-    , Cmd.none
+    , fetchEntry
     )
 
 
@@ -39,6 +34,10 @@ init =
 
 
 type alias Model =
+    String
+
+
+type alias Entry =
     String
 
 
@@ -54,20 +53,35 @@ model =
 type Msg
     = Change String
     | Success (Result Http.Error String)
+    | InitialEntry (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Change entry ->
-            ( entry
-            , Http.send Success (postEntry entry)
+        InitialEntry (Ok response) ->
+            ( response
+            , Cmd.none
+            )
+
+        InitialEntry (Err response) ->
+            ( ""
+            , Cmd.none
+            )
+
+        Change body ->
+            ( body
+            , Http.send Success (postEntry body)
             )
 
         Success response ->
             ( model
             , Cmd.none
             )
+
+
+parseResponse string =
+    string ++ "!"
 
 
 
@@ -83,7 +97,7 @@ view model =
             [ div [ class "col-xs-12" ]
                 [ div [ class "jumbotron" ]
                     [ h2 [] [ text ("Five Hundo") ]
-                    , textarea [ rows 30, cols 100, onInput Change, placeholder "...what's up?" ] [ text model ]
+                    , textarea [ rows 30, cols 100, onInput Change ] [ text model ]
                     , p [] [ wordCountLabel model ]
                     ]
                 ]
@@ -93,10 +107,14 @@ view model =
 
 wordCountLabel : String -> Html Msg
 wordCountLabel body =
-    [ wordCount body
-        |> toString
-    , " Words"
-    ]
+  case wordCount body of
+    0 -> text "No Words"
+    1 -> text "1 Word"
+    count ->
+        [ count
+            |> toString
+        , " Words"
+        ]
         |> String.concat
         |> text
 
@@ -125,16 +143,29 @@ isWord string =
 -- HTTP
 
 
-encodeEntry : Model -> Encode.Value
-encodeEntry model =
+entryDecoder =
+    Decode.string
+
+
+fetchEntry =
+    let
+        request =
+            Http.get "/api/entries/today" Decode.string
+    in
+        Http.send InitialEntry request
+
+
+encodeEntry : String -> Encode.Value
+encodeEntry entry =
     Encode.object
-        [ ( "entry", Encode.string model ) ]
+        [ ( "entry", entry |> Encode.string ) ]
 
 
 responseDecoder =
-    Decode.field "id_token" Decode.string
+    Decode.string
 
 
+postEntry : String -> Http.Request String
 postEntry entry =
     let
         encodedEntry =

@@ -14,18 +14,15 @@ defmodule FiveHundo.Web.Router do
   end
 
   scope "/", FiveHundo.Web do
-    pipe_through :browser # Use the default browser stack
-
+    pipe_through :browser
     get "/", PageController, :index
-
-
   end
 
-  # Other scopes may use custom stacks.
   scope "/api", FiveHundo.Web do
     pipe_through :api
 
     scope "/entries" do
+      get "/today", EntriesController, :today
       post "/save", EntriesController, :save
     end
   end
