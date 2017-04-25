@@ -4,18 +4,34 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import Regex
+import Http exposing (post, Body)
+import Json.Encode as Encode
+import Json.Decode as Decode exposing (Decoder)
 
 
 -- APP
+-- main : Program Never Model Msg
+-- main =
+--     Html.beginnerProgram
+--         { model = model
+--         , view = view
+--         , update = update
+--         }
 
 
-main : Program Never Model Msg
 main =
-    Html.beginnerProgram
-        { model = model
-        , view = view
+    program
+        { init = init
         , update = update
+        , subscriptions = always Sub.none
+        , view = view
         }
+
+
+init =
+    ( ""
+    , Cmd.none
+    )
 
 
 
@@ -37,13 +53,21 @@ model =
 
 type Msg
     = Change String
+    | Success (Result Http.Error String)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Change text ->
-            text
+        Change entry ->
+            ( entry
+            , Http.send Success (postEntry entry)
+            )
+
+        Success response ->
+            ( model
+            , Cmd.none
+            )
 
 
 
@@ -101,6 +125,22 @@ isWord string =
 -- HTTP
 
 
-encodeEntry : Model -> String
+encodeEntry : Model -> Encode.Value
 encodeEntry model =
-  """{"entry" : \"""" ++ model ++ "\""
+    Encode.object
+        [ ( "entry", Encode.string model ) ]
+
+
+responseDecoder =
+    Decode.field "id_token" Decode.string
+
+
+postEntry entry =
+    let
+        encodedEntry =
+            encodeEntry (entry)
+    in
+        post
+            ("/api/entries/save")
+            (Http.stringBody "application/json" <| Encode.encode 0 <| encodeEntry entry)
+            (responseDecoder)
