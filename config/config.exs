@@ -2,7 +2,7 @@ use Mix.Config
 
 config :five_hundo,
   timezone: "America/New_York",
-  cutoff_time: {5, 0, 0, :AM}
+  cutoff_time: {5, 0, :AM}
 
 config :five_hundo,
   ecto_repos: [FiveHundo.Repo]

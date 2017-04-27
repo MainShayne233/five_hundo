@@ -1,6 +1,6 @@
 defmodule FiveHundo.Entry do
   use Ecto.Schema
-  import Ecto.Changeset
+  import Ecto.{Changeset, Query}
   alias FiveHundo.{DateTime, Repo}
 
   schema "entries" do
@@ -19,10 +19,6 @@ defmodule FiveHundo.Entry do
     :year,
     :month,
     :day,
-    :hours,
-    :minutes,
-    :seconds,
-    :meridiem,
   ]
 
   def changeset(struct, params \\ %{}) do
@@ -36,13 +32,35 @@ defmodule FiveHundo.Entry do
     |> Repo.insert
   end
 
+  def create!(params) do
+    params
+    |> create
+    |> elem(1)
+  end
+
   def get_or_create_todays do
-    today = DateTime.today()
+    today = DateTime.current_working_day()
+    today
+    |> get_by
+    |> case do
+      nil   -> create!(today)
+      entry -> entry
+    end
+  end
+
+  def get_by(params) do
+    __MODULE__
+    |> Repo.get_by(params |> Map.to_list)
   end
 
   def delete_all do
     __MODULE__
     |> Repo.delete_all
+  end
+
+  def count do
+    (from e in __MODULE__, select: count("*"))
+    |> Repo.one
   end
 
 end
