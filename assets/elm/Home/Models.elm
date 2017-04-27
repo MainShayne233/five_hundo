@@ -1,11 +1,14 @@
 module Models exposing (..)
 
-import Action exposing (..)
 import Debounce exposing (Debounce)
 import Msgs exposing (..)
 import Time exposing (second)
 import Commands exposing (fetchEntry)
 
+type Action
+    = Typing
+    | Saved
+    | Idle
 
 type alias Model =
     { entry : Entry

@@ -5,8 +5,7 @@ import Html.Attributes exposing (class, style, rows, cols)
 import Html.Events exposing (onInput)
 import Regex exposing (split, regex)
 import Msgs exposing (..)
-import Action exposing (..)
-import Models exposing (Model)
+import Models exposing (..)
 
 
 view : Model -> Html Msg

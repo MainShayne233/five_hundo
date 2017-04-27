@@ -2,7 +2,6 @@ module Update exposing (..)
 
 import Msgs exposing (..)
 import Models exposing (..)
-import Action exposing (..)
 import Commands exposing (persistEntry, postEntry, setIdle)
 import Debounce exposing (Debounce)
 import Time exposing (second)
