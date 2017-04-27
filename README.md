@@ -17,7 +17,8 @@ config :five_hundo,
 
 Then start the app itself:
 ```bash
-mix deps.get # fetch dependencies
+mix deps.get # elixir fetch dependencies
+mix assets.install # fetch node/elm dependencies
 mix ecto.create # create your database
 mix phoenix.server # start the server
 ```
