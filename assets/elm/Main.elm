@@ -1,17 +1,15 @@
 module Main exposing (..)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, program, div, p, h2, textarea, text)
+import Html.Attributes exposing (class, style, rows, cols)
 import Html.Events exposing (onInput)
-import Regex
-import Http exposing (post, Body)
+import Regex exposing (split, regex)
+import Http exposing (post)
 import Json.Encode as Encode
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode)
-import RemoteData exposing (WebData)
 import Debounce exposing (Debounce)
-import Time exposing (..)
-import Task exposing (..)
+import Time exposing (second)
+import Task exposing (perform, succeed)
 
 
 -- APP
@@ -38,7 +36,9 @@ init =
 
 type alias Model =
     { entry : String
-    , debounce : Debounce String
+    , persistDebounce : Debounce String
+    , setIdleDebounce : Debounce String
+    , action : Action
     }
 
 
@@ -48,17 +48,28 @@ type alias Entry =
 
 model : Model
 model =
-    { entry = "", debounce = Debounce.init }
+    { entry = ""
+    , persistDebounce = Debounce.init
+    , setIdleDebounce = Debounce.init
+    , action = Idle
+    }
 
 
 
 -- DEBOUNCE
 
 
-debounceConfig : Debounce.Config Msg
-debounceConfig =
-    { strategy = Debounce.later (1 * second)
-    , transform = DebounceMsg
+persistDebounceConfig : Debounce.Config Msg
+persistDebounceConfig =
+    { strategy = Debounce.later (0.5 * second)
+    , transform = PersistDebounce
+    }
+
+
+setIdleDebounceConfig : Debounce.Config Msg
+setIdleDebounceConfig =
+    { strategy = Debounce.later (0.5 * second)
+    , transform = SetIdleDebounce
     }
 
 
@@ -66,12 +77,20 @@ debounceConfig =
 -- UPDATE
 
 
+type Action
+    = Typing
+    | Idle
+    | Save
+
+
 type Msg
     = Change String
-    | Success (Result Http.Error String)
+    | PersistSuccess (Result Http.Error String)
     | InitialEntry (Result Http.Error String)
-    | DebounceMsg Debounce.Msg
+    | PersistDebounce Debounce.Msg
+    | SetIdleDebounce Debounce.Msg
     | PersistEntry String
+    | SetIdle String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,33 +109,55 @@ update msg model =
         Change body ->
             let
                 ( debounce, cmd ) =
-                    Debounce.push debounceConfig body model.debounce
+                    Debounce.push persistDebounceConfig body model.persistDebounce
             in
-                ( { model | entry = body, debounce = debounce }
+                ( { model | entry = body, persistDebounce = debounce, action = Typing }
                 , cmd
                 )
 
-        Success response ->
-            ( model
-            , Cmd.none
-            )
+        PersistSuccess response ->
+            let
+                ( debounce, cmd ) =
+                    Debounce.push setIdleDebounceConfig "" model.setIdleDebounce
+            in
+                ( { model | setIdleDebounce = debounce }
+                , cmd
+                )
 
-        DebounceMsg msg ->
+        PersistDebounce msg ->
             let
                 ( debounce, cmd ) =
                     Debounce.update
-                        debounceConfig
+                        persistDebounceConfig
                         (Debounce.takeLast persistEntry)
                         msg
-                        model.debounce
+                        model.persistDebounce
             in
-                ( { model | debounce = debounce }
+                ( { model | persistDebounce = debounce }
+                , cmd
+                )
+
+        SetIdleDebounce msg ->
+            let
+                ( debounce, cmd ) =
+                    Debounce.update
+                        setIdleDebounceConfig
+                        (Debounce.takeLast setIdle)
+                        msg
+                        model.setIdleDebounce
+            in
+                ( { model | setIdleDebounce = debounce }
                 , cmd
                 )
 
         PersistEntry entry ->
-            ( model
-            , Http.send Success (postEntry entry)
+            ( { model | action = Save }
+            , Http.send PersistSuccess (postEntry entry)
+            )
+
+        SetIdle str ->
+            ( { model | action = Idle }
+            , Cmd.none
             )
 
 
@@ -125,7 +166,11 @@ parseResponse string =
 
 
 persistEntry entry =
-    Task.perform PersistEntry (Task.succeed entry)
+    perform PersistEntry (succeed entry)
+
+
+setIdle str =
+    perform SetIdle (succeed str)
 
 
 
@@ -135,7 +180,7 @@ persistEntry entry =
 
 
 view : Model -> Html Msg
-view { entry } =
+view { entry, action } =
     div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
         [ div [ class "row" ]
             [ div [ class "col-xs-12" ]
@@ -143,11 +188,24 @@ view { entry } =
                     [ h2 [] [ text ("Five Hundo") ]
                     , textarea [ rows 30, cols 100, onInput Change ] [ text entry ]
                     , p [] [ wordCountLabel entry ]
-                    , p [] [ text entry ]
+                    , p [] [ actionLabel action ]
                     ]
                 ]
             ]
         ]
+
+
+actionLabel : Action -> Html Msg
+actionLabel action =
+    case action of
+        Typing ->
+            text "typing..."
+
+        Save ->
+            text "saved!"
+
+        Idle ->
+            text ""
 
 
 wordCountLabel : String -> Html Msg
@@ -172,7 +230,7 @@ wordCount : String -> Int
 wordCount body =
     let
         words =
-            Regex.split Regex.All (Regex.regex " |\n") body
+            split Regex.All (regex " |\n") body
     in
         List.filter isWord words
             |> List.length
