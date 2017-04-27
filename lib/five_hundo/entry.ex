@@ -26,10 +26,26 @@ defmodule FiveHundo.Entry do
     |> cast(params, @fields)
   end
 
+  def for_today do
+    get_or_create_todays()
+    |> Map.get(:text)
+  end
+
+  def update_todays_text(text) do
+    get_or_create_todays()
+    |> __MODULE__.update(%{text: text})
+  end
+
   def create(params) do
     %__MODULE__{}
     |> changeset(params)
     |> Repo.insert
+  end
+
+  def update(entry, params) do
+    entry
+    |> changeset(params)
+    |> Repo.update
   end
 
   def create!(params) do
@@ -62,5 +78,4 @@ defmodule FiveHundo.Entry do
     (from e in __MODULE__, select: count("*"))
     |> Repo.one
   end
-
 end
