@@ -20,7 +20,13 @@ Then start the app itself:
 mix deps.get # elixir fetch dependencies
 mix assets.install # fetch node/elm dependencies
 mix ecto.create # create your database
-mix phoenix.server # start the server
+mix phx.server # start the server
+
+# one liner
+mix do deps.get, assets.install, ecto.create, phx.server
 ```
 
 Then visit [localhost:4000](http://localhost:4000)
+
+Note: This app is a Phoenix 1.3 app, and Phoenix 1.3 uses `phx` instead of `phoenix` for mix tasks.
+`phoenix` should still work, but I recommend you [install Phoenix 1.3](https://github.com/phoenixframework/phoenix/blob/master/installer/README.md)
