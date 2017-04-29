@@ -52,7 +52,68 @@ Note: This app is a Phoenix 1.3 app, and Phoenix 1.3 uses `phx` instead of `phoe
 
 ## Deploy to Heroku
 
-First, create your `./config/prod.secret.exs` file
+First, create a new branch for your heroku deploys (so you don't push your secret keys to Github):
 
 ```bash
+# create a branch for your heroku deploys
+git checkout -b heroku
 ```
+
+Then create your `./config/prod.secret.exs` file, which should look something like this:
+
+```elixir
+use Mix.Config
+
+config :five_hundo,
+  password_digest: "$2b$12$RaqGYrkw/6bgF/1.2v4j6uu86XdpvPfxLUP9NbJi/p3QiCnDFxPLu"
+  # create with mix auth.digest your_password
+
+config :five_hundo, FiveHundo.Web.Endpoint,
+  secret_key_base: "WWLcNAWtGoO2OAiP72U5bR3zRIgC/ql2Tf0/0Ahg3eprIR4KOmKSWHCXVAEVX6wK"
+  # create with mix phx.gen.secret
+
+config :five_hundo, FiveHundo.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  url: System.get_env("DATABASE_URL"), # leave this as is
+  username: System.get_env("DATABASE_USERNAME"), # leave this as is
+  password: System.get_env("DATABASE_PASSWORD"), # leave this as is
+  database: "five_hundo_prod",
+  pool_size: 5
+```
+
+Then remove `/config/*.secret.exs` from `./.gitignore`, and commit `./config/prod.secret.exs`
+
+```bash
+git add config/prod.secret.exs
+git commit -m "adds db secret"
+```
+
+Then setup Heroku
+
+```bash
+# create app
+heroku create your_app_name
+
+# set buildpacks
+heroku buildpacks:set https://github.com/HashNuke/heroku-buildpack-elixir
+heroku buildpacks:add https://github.com/MainShayne233/heroku-buildpack-phoenix-static
+
+# add postgres
+heroku addons:create heroku-postgresql:hobby-dev
+
+# set db secret key
+heroku config:set SECRET_KEY_BASE="WWLcNAWtGoO2OAiP72U5bR3zRIgC/ql2Tf0/0Ahg3eprIR4KOmKSWHCXVAEVX6wK"
+# the secret key from your ./config/prod.secret.exs
+
+# make your first deploys
+git push heroku heroku:master
+```
+
+Once it's done, you'll need to migrate the databse:
+```bash
+heroku run mix ecto.migrate
+```
+
+Then visit your app at [your_app_name.herokuapp.com](https://your_app_name.herokuapp.com)
+
+Note: I'd be happy to receive issues if these steps did not work for you. In the mean time, the command `heroku logs --tail` is very useful in debugging Heroku deploy isssues
