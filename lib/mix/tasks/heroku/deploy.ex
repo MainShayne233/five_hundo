@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Heroku.Deploy do
     commit_secrets()
     setup_heroku(app_name, db_secret)
     checkout_master()
-    print_conclusion_message()
+    print_conclusion_message(app_name)
   end
 
   def run(_) do
@@ -35,7 +35,7 @@ defmodule Mix.Tasks.Heroku.Deploy do
      use Mix.Config
      
      config :five_hundo,
-       password_digest: "#{password |> FiveHundo.Auth.encrypt"
+       password_digest: "#{password |> FiveHundo.Auth.encrypt}"
        # create with mix auth.digest your_password
      
      config :five_hundo, FiveHundo.Web.Endpoint,
@@ -73,7 +73,7 @@ defmodule Mix.Tasks.Heroku.Deploy do
 
   def setup_heroku(app_name, secret_key) do
     [
-      "heroku create #{app_name}"
+      "heroku create #{app_name}",
       "heroku buildpacks:set https://github.com/HashNuke/heroku-buildpack-elixir",
       "heroku buildpacks:add https://github.com/MainShayne233/heroku-buildpack-phoenix-static",
       "heroku addons:create heroku-postgresql:hobby-dev",
