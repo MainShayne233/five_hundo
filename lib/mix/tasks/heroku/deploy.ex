@@ -55,7 +55,7 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
   end 
 
   def new_gitignore do
-    file = File.read(".gitignore")
+    file = File.read!(".gitignore")
     |> String.split("\n")
     |> Enum.reject(&( &1 |> String.contains?("secret") ))
     |> Enum.join("\n")
