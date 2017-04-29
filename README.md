@@ -49,3 +49,10 @@ Then visit [localhost:4000](http://localhost:4000)
 
 Note: This app is a Phoenix 1.3 app, and Phoenix 1.3 uses `phx` instead of `phoenix` for mix tasks.
 `phoenix` should still work, but I recommend you [install Phoenix 1.3](https://github.com/phoenixframework/phoenix/blob/master/installer/README.md)
+
+## Deploy to Heroku
+
+First, create your `./config/prod.secret.exs` file
+
+```bash
+```
