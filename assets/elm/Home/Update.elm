@@ -2,7 +2,7 @@ module Update exposing (..)
 
 import Msgs exposing (..)
 import Models exposing (..)
-import Commands exposing (persistEntry, postEntry, setIdle)
+import Commands exposing (fetchEntry, persistEntry, postEntry, setIdle, submitPassword)
 import Debounce exposing (Debounce)
 import Time exposing (second)
 
@@ -28,6 +28,50 @@ update msg model =
                 ( { model | entry = body, persistDebounce = debounce, action = Typing }
                 , cmd
                 )
+
+        PasswordChange password ->
+            ( { model | entry = password }
+            , Cmd.none
+            )
+
+        SubmitPassword password ->
+            ( { model | passwordMessage = "checking..." }
+            , submitPassword password
+            )
+
+        PasswordResponse (Ok response) ->
+            case response of
+                "authorized" ->
+                    ( { model | authorization = Authorized }
+                    , fetchEntry
+                    )
+
+                other ->
+                    ( { model | passwordMessage = "try again" }
+                    , Cmd.none
+                    )
+
+        PasswordResponse (Err response) ->
+            ( { model | entry = response |> toString }
+            , Cmd.none
+            )
+
+        SessionResponse (Ok response) ->
+            case response of
+                "authorized" ->
+                    ( { model | authorization = Authorized }
+                    , fetchEntry
+                    )
+
+                other ->
+                    ( model
+                    , Cmd.none
+                    )
+
+        SessionResponse (Err response) ->
+            ( { model | entry = response |> toString }
+            , Cmd.none
+            )
 
         PersistSuccess response ->
             let

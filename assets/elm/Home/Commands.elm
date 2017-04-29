@@ -32,6 +32,12 @@ encodeEntry entry =
         [ ( "entry", entry |> Encode.string ) ]
 
 
+encodePassword : String -> Encode.Value
+encodePassword password =
+    Encode.object
+        [ ( "password", password |> Encode.string ) ]
+
+
 
 -- HTTP
 
@@ -45,8 +51,34 @@ fetchEntry =
         Http.send InitialEntry request
 
 
+checkIfAuthorized : Cmd Msg
+checkIfAuthorized =
+    let
+        request =
+            Http.get "/api/authorization/session" Decode.string
+    in
+        Http.send SessionResponse request
+
+
 
 -- REQUESTS
+
+
+submitPassword : String -> Cmd Msg
+submitPassword password =
+    Http.send PasswordResponse (submitPasswordRequest password)
+
+
+submitPasswordRequest : String -> Http.Request String
+submitPasswordRequest password =
+    let
+        encodedPassword =
+            encodePassword (password)
+    in
+        post
+            ("/api/authorization/authorize")
+            (Http.stringBody "application/json" <| Encode.encode 0 <| encodedPassword)
+            (Decode.string)
 
 
 postEntry : String -> Cmd Msg

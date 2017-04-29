@@ -1,27 +1,47 @@
 module View exposing (view)
 
-import Html exposing (Html, div, p, h2, textarea, text)
-import Html.Attributes exposing (class, style, rows, cols)
-import Html.Events exposing (onInput)
+import Html exposing (Html, div, p, h2, textarea, input, text, button)
+import Html.Attributes exposing (class, style, rows, cols, placeholder)
+import Html.Events exposing (onInput, onClick)
 import Regex exposing (split, regex)
 import Msgs exposing (..)
 import Models exposing (..)
 
 
 view : Model -> Html Msg
-view { entry, action } =
-    div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
-        [ div [ class "row" ]
-            [ div [ class "col-xs-12" ]
-                [ div [ class "jumbotron" ]
-                    [ h2 [] [ text ("Five Hundo") ]
-                    , textarea [ rows 25, cols 100, onInput Change ] [ text entry ]
-                    , p [] [ wordCountLabel entry ]
-                    , p [] [ actionLabel action ]
+view { entry, action, authorization, passwordMessage } =
+    case authorization of
+        Authorized ->
+            div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
+                [ div [ class "row" ]
+                    [ div [ class "col-xs-12" ]
+                        [ div [ class "jumbotron" ]
+                            [ h2 [] [ text ("Five Hundo") ]
+                            , textarea [ rows 25, cols 100, onInput Change ] [ text entry ]
+                            , p [] [ wordCountLabel entry ]
+                            , p [] [ actionLabel action ]
+                            ]
+                        ]
                     ]
                 ]
-            ]
-        ]
+
+        NotAuthorized ->
+            div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
+                [ div [ class "row" ]
+                    [ div [ class "col-xs-12" ]
+                        [ div [ class "jumbotron" ]
+                            [ h2 [] [ text ("Five Hundo") ]
+                            , input
+                                [ placeholder "Enter password..."
+                                , onInput PasswordChange
+                                ]
+                                []
+                            , button [ onClick (SubmitPassword entry) ] [ text "Submit" ]
+                            , p [] [ text passwordMessage ]
+                            ]
+                        ]
+                    ]
+                ]
 
 
 actionLabel : Action -> Html Msg

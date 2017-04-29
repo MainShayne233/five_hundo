@@ -11,6 +11,8 @@ defmodule FiveHundo.Web.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug Guardian.Plug.VerifyHeader, realm: "Bearer"
+    plug Guardian.Plug.LoadResource
   end
 
   scope "/", FiveHundo.Web do
@@ -20,6 +22,11 @@ defmodule FiveHundo.Web.Router do
 
   scope "/api", FiveHundo.Web do
     pipe_through :api
+
+    scope "/authorization" do
+      get "/session", AuthorizationController, :session
+      post "/authorize", AuthorizationController, :authorize
+    end
 
     scope "/entries" do
       get "/today", EntriesController, :today

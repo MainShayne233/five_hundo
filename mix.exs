@@ -27,9 +27,11 @@ defmodule FiveHundo.Mixfile do
   defp deps do
     [
       {:calendar, "~> 0.17.2"},
+      {:comeonin, "~> 3.0.1"},
       {:cowboy, "~> 1.0"},
+      {:guardian, "~> 0.14.0"},
       {:gettext, "~> 0.11"},
-      {:phoenix, "~> 1.3.0-rc"},
+      {:phoenix, "~> 1.3.0-rc", override: true},
       {:phoenix_ecto, "~> 3.2"},
       {:phoenix_html, "~> 2.6"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},

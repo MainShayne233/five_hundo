@@ -1,5 +1,8 @@
 use Mix.Config
 
+config :five_hundo,
+  password_digest: "$2b$12$4fRXg9qrCZkPgmiEvNmPWeUAtWkbhJBiCPeDXsbgvuu7jsOPoKkXm"
+
 config :five_hundo, FiveHundo.Web.Endpoint,
   http: [port: 4000],
   debug_errors: true,
@@ -32,6 +35,3 @@ config :five_hundo, FiveHundo.Repo,
   database: "five_hundo_dev",
   hostname: "localhost",
   pool_size: 10
-
-
-  

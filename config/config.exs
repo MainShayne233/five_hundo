@@ -18,4 +18,10 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+config :guardian, Guardian,
+  issuer: "Genie",
+  ttl: {30, :days},
+  secret_key: "qqUynzWxnE7KG4as8Q3oZXJYD8tCfKzDBQJJKW/kZoE9l421pJsIvI340+fKEXW7",
+  serializer: Genie.GuardianSerializer
+
 import_config "#{Mix.env}.exs"

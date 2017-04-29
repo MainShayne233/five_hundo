@@ -6,6 +6,10 @@ import Http exposing (post)
 
 type Msg
     = Change String
+    | PasswordChange String
+    | PasswordResponse (Result Http.Error String)
+    | SessionResponse (Result Http.Error String)
+    | SubmitPassword String
     | PersistSuccess (Result Http.Error String)
     | InitialEntry (Result Http.Error String)
     | PersistDebounce Debounce.Msg

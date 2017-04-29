@@ -3,7 +3,7 @@ module Models exposing (..)
 import Debounce exposing (Debounce)
 import Msgs exposing (..)
 import Time exposing (second)
-import Commands exposing (fetchEntry)
+import Commands exposing (checkIfAuthorized)
 
 
 type Action
@@ -12,11 +12,18 @@ type Action
     | Idle
 
 
+type Authorization
+    = Authorized
+    | NotAuthorized
+
+
 type alias Model =
     { entry : Entry
     , persistDebounce : Debounce String
     , setIdleDebounce : Debounce String
     , action : Action
+    , authorization : Authorization
+    , passwordMessage : String
     }
 
 
@@ -30,13 +37,15 @@ model =
     , persistDebounce = Debounce.init
     , setIdleDebounce = Debounce.init
     , action = Idle
+    , authorization = NotAuthorized
+    , passwordMessage = ""
     }
 
 
 init : ( Model, Cmd Msg )
 init =
     ( model
-    , fetchEntry
+    , checkIfAuthorized
     )
 
 
