@@ -22,6 +22,8 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
   end
 
   def checkout_heroku do
+    Mix.Shell.IO.cmd "git add -A"
+    Mix.Shell.IO.cmd "git commit -m \"changes prior to heroku deploy\""
     Mix.Shell.IO.cmd "git checkout -b heroku"
   end
 
@@ -87,6 +89,7 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
 
   def checkout_master do
     Mix.Shell.IO.cmd "git checkout master"
+    Mix.Shell.IO.cmd "git reset --hard"
   end
 
   def print_conclusion_message(app_name) do
