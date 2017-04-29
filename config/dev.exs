@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :five_hundo,
-  password_digest: "$2b$12$4fRXg9qrCZkPgmiEvNmPWeUAtWkbhJBiCPeDXsbgvuu7jsOPoKkXm"
+  password_digest: "$2b$12$1gHryyKuVtmUeqHc3QxNH.XfZtLZ3t4QXGw3cgtftFag766Yn1Jn6"
 
 config :five_hundo, FiveHundo.Web.Endpoint,
   http: [port: 4000],

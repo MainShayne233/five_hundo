@@ -25,7 +25,9 @@ mix ecto.create # create your database
 mix do deps.get, assets.install, ecto.create
 ```
 
-Then create your password digest (development and/or production):
+Then create your password digest for development and/or production.
+
+(default dev password is `five_hundo`)
 ```bash
 mix auth.digest your_super_secure_password
 ```
