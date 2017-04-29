@@ -15,15 +15,32 @@ config :five_hundo,
   cutoff_time: {1, 30, :AM}
 ```
 
-Then start the app itself:
+Then init the app:
 ```bash
 mix deps.get # elixir fetch dependencies
 mix assets.install # fetch node/elm dependencies
 mix ecto.create # create your database
-mix phx.server # start the server
 
 # one liner
-mix do deps.get, assets.install, ecto.create, phx.server
+mix do deps.get, assets.install, ecto.create
+```
+
+Then create your password digest (development and/or production):
+```bash
+mix auth.digest your_super_secure_password
+```
+
+and place it in `config/dev.exs` for development and/or `config/prod.secret.exs`
+for production, like so:
+
+```elixir
+config :five_hundo,
+  password_digest: "crazy_long_key_of_jibberish"
+```
+
+Then start the server
+```bash
+mix phx.server
 ```
 
 Then visit [localhost:4000](http://localhost:4000)
