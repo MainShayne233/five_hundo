@@ -1,5 +1,4 @@
-defmodule Mix.Tasks.Heroku.Deploy do
-  use Mix.Task
+defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
 
   def run([app_name, password]) do
     checkout_heroku()
@@ -14,7 +13,9 @@ defmodule Mix.Tasks.Heroku.Deploy do
 
   def run(_) do
     Mix.Shell.IO.info """
-    You must supply an app_name and a password. Example:
+    You must supply an app_name and a password. 
+    
+    Example:
 
     mix heroku.deploy my_app_name my_password
     """
@@ -56,7 +57,7 @@ defmodule Mix.Tasks.Heroku.Deploy do
   def new_gitignore do
     file = File.read(".gitignore")
     |> String.split("\n")
-    |> Enum.reject&( &1 |> String.contains?("secret") )
+    |> Enum.reject(&( &1 |> String.contains?("secret") ))
     |> Enum.join("\n")
 
     File.write(".gitignore", file)
