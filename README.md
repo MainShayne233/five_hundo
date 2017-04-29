@@ -60,6 +60,7 @@ Make sure you have [Heroku installed](https://devcenter.heroku.com/articles/hero
 
 Then run the mix task with the Heroku app name you want, and password for the app:
 ```bash
+mix deps.get # if you haven't already
 mix heroku.deploy my-app-name my_password
 ```
 
