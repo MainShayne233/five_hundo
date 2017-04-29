@@ -94,7 +94,7 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
       "git add -A",
       "git reset --hard",
     ]
-    |> Enum.each(&Mix.Shell.IO.cmd/1)d"
+    |> Enum.each(&Mix.Shell.IO.cmd/1)
   end
 
   def print_conclusion_message(app_name) do
