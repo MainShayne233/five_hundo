@@ -13,8 +13,8 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
 
   def run(_) do
     Mix.Shell.IO.info """
-    You must supply an app_name and a password. 
-    
+    You must supply an app_name and a password.
+
     Example:
 
     mix heroku.deploy my_app_name my_password
@@ -28,23 +28,23 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
   end
 
   def new_db_secret do
-    :crypto.strong_rand_bytes(64) 
-    |> Base.encode64 
+    :crypto.strong_rand_bytes(64)
+    |> Base.encode64
     |> binary_part(0, 64)
   end
 
   def create_prod_secret(secret_key, password) do
     file = """
      use Mix.Config
-     
+
      config :five_hundo,
        password_digest: "#{password |> FiveHundo.Auth.encrypt}"
        # create with mix auth.digest your_password
-     
+
      config :five_hundo, FiveHundo.Web.Endpoint,
        secret_key_base: "#{secret_key}"
        # create with mix phx.gen.secret
-     
+
      config :five_hundo, FiveHundo.Repo,
        adapter: Ecto.Adapters.Postgres,
        url: System.get_env("DATABASE_URL"), # leave this as is
@@ -54,7 +54,7 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
        pool_size: 5
     """
     File.write("config/prod.secret.exs", file)
-  end 
+  end
 
   def new_gitignore do
     file = File.read!(".gitignore")
@@ -88,8 +88,13 @@ defmodule Mix.Tasks.Heroku.Deploy do use Mix.Task
   end
 
   def checkout_master do
-    Mix.Shell.IO.cmd "git checkout master"
-    Mix.Shell.IO.cmd "git reset --hard"
+    [
+      "git stash",
+      "git checkout master",
+      "git add -A",
+      "git reset --hard",
+    ]
+    |> Enum.each(&Mix.Shell.IO.cmd/1)d"
   end
 
   def print_conclusion_message(app_name) do
