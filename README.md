@@ -2,7 +2,7 @@
 
 A [750words.com](http://750words.com) clone for personal use, and maybe yours?
 
-Demo: http://fivehundo.herokuapp.com/ (password is `five_hundo`)
+Demo: http://fivehundo.herokuapp.com (password is `five_hundo`)
 
 ## Use
 Clone this repo and enter the app's directory
@@ -118,4 +118,6 @@ heroku run mix ecto.migrate
 
 Then visit your app at [your_app_name.herokuapp.com](https://your_app_name.herokuapp.com)
 
-Note: I'd be happy to receive issues if these steps did not work for you. In the mean time, the command `heroku logs --tail` is very useful in debugging Heroku deploy isssues
+Note: I'd be happy to receive issues if these steps did not work for you.
+In the mean time, the command `heroku logs --tail` is very useful in debugging
+Heroku deploy issues
