@@ -33,6 +33,7 @@ model =
     }
 
 
+init : ( Model, Cmd Msg )
 init =
     ( model
     , fetchEntry

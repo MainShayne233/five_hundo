@@ -12,10 +12,12 @@ import Msgs exposing (..)
 -- TASKS
 
 
+persistEntry : String -> Cmd Msg
 persistEntry entry =
     Task.perform PersistEntry (Task.succeed entry)
 
 
+setIdle : String -> Cmd Msg
 setIdle str =
     Task.perform SetIdle (Task.succeed str)
 
@@ -34,6 +36,7 @@ encodeEntry entry =
 -- HTTP
 
 
+fetchEntry : Cmd Msg
 fetchEntry =
     let
         request =
@@ -46,6 +49,7 @@ fetchEntry =
 -- REQUESTS
 
 
+postEntry : String -> Cmd Msg
 postEntry entry =
     Http.send PersistSuccess (postEntryRequest entry)
 
