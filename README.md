@@ -111,7 +111,7 @@ heroku config:set SECRET_KEY_BASE="WWLcNAWtGoO2OAiP72U5bR3zRIgC/ql2Tf0/0Ahg3eprI
 git push heroku heroku:master
 ```
 
-Once it's done, you'll need to migrate the databse:
+Once it's done, you'll need to migrate the database:
 ```bash
 heroku run mix ecto.migrate
 ```
