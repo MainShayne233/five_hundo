@@ -2,7 +2,7 @@
 
 A [750words.com](http://750words.com) clone for personal use, and maybe yours?
 
-Demo: http://fivehundo.herokuapp.com/
+Demo: http://fivehundo.herokuapp.com/ (password is `five_hundo`)
 
 ## Use
 Clone this repo and enter the app's directory
