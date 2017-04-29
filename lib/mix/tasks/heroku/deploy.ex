@@ -5,6 +5,7 @@ defmodule Mix.Tasks.Heroku.Deploy do
     checkout_heroku()
     db_secret = new_db_secret()
     create_prod_secret(db_secret, password)
+    new_gitignore()
     commit_secrets()
     setup_heroku(app_name, db_secret)
     checkout_master()
@@ -51,6 +52,15 @@ defmodule Mix.Tasks.Heroku.Deploy do
     """
     File.write("config/prod.secret.exs", file)
   end 
+
+  def new_gitignore do
+    file = File.read(".gitignore")
+    |> String.split("\n")
+    |> Enum.reject&( &1 |> String.contains?("secret") )
+    |> Enum.join("\n")
+
+    File.write(".gitignore", file)
+  end
 
   def commit_secrets do
     [
