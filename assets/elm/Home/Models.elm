@@ -15,6 +15,7 @@ type Action
 type Authorization
     = Authorized
     | NotAuthorized
+    | Checking
 
 
 type alias Model =
@@ -37,7 +38,7 @@ model =
     , persistDebounce = Debounce.init
     , setIdleDebounce = Debounce.init
     , action = Idle
-    , authorization = NotAuthorized
+    , authorization = Checking
     , passwordMessage = ""
     }
 

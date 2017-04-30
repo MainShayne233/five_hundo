@@ -17,13 +17,22 @@ view { entry, action, authorization, passwordMessage } =
                     [ div [ class "col-xs-12" ]
                         [ div [ class "jumbotron" ]
                             [ h2 [] [ text ("Five Hundo") ]
-                            , textarea [ rows 25, cols 100, onInput Change ] [ text entry ]
+                            , textarea
+                                [ rows 25
+                                , cols 100
+                                , onInput Change
+                                , placeholder "Today I..."
+                                ]
+                                [ text entry ]
                             , p [] [ wordCountLabel entry ]
                             , p [] [ actionLabel action ]
                             ]
                         ]
                     ]
                 ]
+
+        Checking ->
+            div [] []
 
         NotAuthorized ->
             div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
