@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import Html exposing (Html, div, p, h2, textarea, input, text, button)
-import Html.Attributes exposing (class, style, rows, cols, placeholder)
+import Html.Attributes exposing (class, style, rows, cols, placeholder, type_)
 import Html.Events exposing (onInput, onClick)
 import Regex exposing (split, regex)
 import Msgs exposing (..)
@@ -33,6 +33,7 @@ view { entry, action, authorization, passwordMessage } =
                             [ h2 [] [ text ("Five Hundo") ]
                             , input
                                 [ placeholder "Enter password..."
+                                , type_ "password"
                                 , onInput PasswordChange
                                 ]
                                 []
