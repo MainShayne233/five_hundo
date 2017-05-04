@@ -11,7 +11,7 @@ type Msg
     | SessionResponse (Result Http.Error String)
     | SubmitPassword String
     | PersistSuccess (Result Http.Error String)
-    | InitialEntry (Result Http.Error String)
+    | InitialEntry (Result Http.Error { entry : String, breakdown : List String })
     | PersistDebounce Debounce.Msg
     | SetIdleDebounce Debounce.Msg
     | PersistEntry String

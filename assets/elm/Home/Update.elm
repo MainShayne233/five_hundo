@@ -2,7 +2,7 @@ module Update exposing (..)
 
 import Msgs exposing (..)
 import Models exposing (..)
-import Commands exposing (fetchEntry, persistEntry, postEntry, setIdle, submitPassword)
+import Commands exposing (..)
 import Debounce exposing (Debounce)
 import Time exposing (second)
 
@@ -10,8 +10,8 @@ import Time exposing (second)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        InitialEntry (Ok response) ->
-            ( { model | entry = response }
+        InitialEntry (Ok { entry, breakdown }) ->
+            ( { model | entry = entry, breakdown = breakdown }
             , Cmd.none
             )
 

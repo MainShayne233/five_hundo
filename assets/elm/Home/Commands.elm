@@ -1,12 +1,13 @@
 module Commands exposing (..)
 
+import Debounce exposing (Debounce)
 import Http exposing (post)
 import Json.Encode as Encode
-import Json.Decode as Decode
-import Debounce exposing (Debounce)
-import Time exposing (second)
-import Task
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline exposing (decode, required, requiredAt, optional, hardcoded)
 import Msgs exposing (..)
+import Task
+import Time exposing (second)
 
 
 -- TASKS
@@ -39,6 +40,26 @@ encodePassword password =
 
 
 
+-- DECODERS
+
+
+type alias EntryResponse =
+    { entry : String, breakdown : List String }
+
+
+stringListDecoder : Decoder (List String)
+stringListDecoder =
+    Decode.list Decode.string
+
+
+entryDecoder : Decoder EntryResponse
+entryDecoder =
+    decode EntryResponse
+        |> required "entry" Decode.string
+        |> required "breakdown" stringListDecoder
+
+
+
 -- HTTP
 
 
@@ -46,7 +67,7 @@ fetchEntry : Cmd Msg
 fetchEntry =
     let
         request =
-            Http.get "/api/entries/today" Decode.string
+            Http.get "/api/entries/today" entryDecoder
     in
         Http.send InitialEntry request
 

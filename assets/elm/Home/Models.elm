@@ -20,6 +20,7 @@ type Authorization
 
 type alias Model =
     { entry : Entry
+    , breakdown: Breakdown
     , persistDebounce : Debounce String
     , setIdleDebounce : Debounce String
     , action : Action
@@ -27,6 +28,8 @@ type alias Model =
     , passwordMessage : String
     }
 
+type alias Breakdown =
+  List String
 
 type alias Entry =
     String
@@ -35,6 +38,7 @@ type alias Entry =
 model : Model
 model =
     { entry = ""
+    , breakdown = []
     , persistDebounce = Debounce.init
     , setIdleDebounce = Debounce.init
     , action = Idle

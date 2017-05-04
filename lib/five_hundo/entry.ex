@@ -2,7 +2,7 @@ defmodule FiveHundo.Entry do
   use Ecto.Schema
   import Ecto.{Changeset, Query}
   alias FiveHundo.{
-    DateTime, 
+    DateTime,
     Repo,
     Word,
   }
@@ -33,6 +33,13 @@ defmodule FiveHundo.Entry do
   end
 
   def for_today do
+    %{
+      entry: todays_entry(),
+      breakdown: breakdown(),
+    }
+  end
+
+  def todays_entry do
     get_or_create_todays()
     |> Map.get(:text)
   end
