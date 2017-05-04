@@ -1,7 +1,11 @@
 defmodule FiveHundo.Entry do
   use Ecto.Schema
   import Ecto.{Changeset, Query}
-  alias FiveHundo.{DateTime, Repo}
+  alias FiveHundo.{
+    DateTime, 
+    Repo,
+    Word,
+  }
 
   schema "entries" do
     field :text, :string
@@ -21,6 +25,8 @@ defmodule FiveHundo.Entry do
     :day,
   ]
 
+  @breakdown_day_count 5
+
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @fields)
@@ -33,7 +39,27 @@ defmodule FiveHundo.Entry do
 
   def update_todays_text(text) do
     get_or_create_todays()
-    |> __MODULE__.update(%{text: text})
+    |> __MODULE__.update(%{
+      text: text,
+      word_count: Word.count(text),
+    })
+  end
+
+  def breakdown do
+    @breakdown_day_count
+    |> DateTime.last_n_days
+    |> Enum.map(&get_by/1)
+    |> Enum.map(&entry_grade/1)
+  end
+
+  defp entry_grade(nil), do: "gutter"
+  defp entry_grade(%__MODULE__{word_count: nil}), do: "gutter"
+  defp entry_grade(%__MODULE__{word_count: word_count}) do
+    if word_count < word_count_goal() do
+      "spare"
+    else
+      "strike"
+    end
   end
 
   def create(params) do
@@ -77,5 +103,10 @@ defmodule FiveHundo.Entry do
   def count do
     (from e in __MODULE__, select: count("*"))
     |> Repo.one
+  end
+
+  def word_count_goal do
+    :five_hundo
+    |> Application.get_env(:word_count_goal)
   end
 end

@@ -1,11 +1,30 @@
 defmodule FiveHundo.DateTime do
 
   def current_working_day do
+    current_working_date()
+    |> to_simple_date
+  end
+  
+  def current_working_date do
     timezone()
     |> Calendar.DateTime.now!
     |> adjust_for_cutoff
-    |> Calendar.DateTime.to_date
-    |> Map.take([:day, :month, :year])
+  end
+
+  def last_n_days(n) do
+    n
+    |> last_n_dates
+    |> Enum.map(&to_simple_date/1)
+  end
+
+  def last_n_dates(n) when n < 1, do: []
+  def last_n_dates(n) do
+    today = current_working_date()
+    (1..n)
+    |> Enum.map(fn days_back -> 
+      today
+      |> Calendar.DateTime.subtract!(days_back * days())
+    end)
   end
 
   defp adjust_for_cutoff(date_time) do
@@ -19,6 +38,14 @@ defmodule FiveHundo.DateTime do
         |> Calendar.DateTime.add!(3600 * hour + 60 * min)
     end
   end
+
+  defp to_simple_date(date) do
+    date
+    |> Calendar.DateTime.to_date
+    |> Map.take([:day, :month, :year]) 
+  end
+
+  defp days, do: 24 * 60 * 60
 
   def timezone do
     :five_hundo
