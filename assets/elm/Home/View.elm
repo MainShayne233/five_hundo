@@ -21,7 +21,7 @@ view { entry, action, authorization, passwordMessage } =
                                 [ rows 25
                                 , cols 100
                                 , onInput Change
-                                , placeholder "Today I..."
+                                , placeholder "..."
                                 ]
                                 [ text entry ]
                             , p [] [ wordCountLabel entry ]
