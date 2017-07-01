@@ -1,11 +1,11 @@
 module View exposing (view)
 
-import Html exposing (Html, div, p, h2, textarea, input, text, button)
-import Html.Attributes exposing (class, style, rows, cols, placeholder, type_)
-import Html.Events exposing (onInput, onClick)
-import Regex exposing (split, regex)
-import Msgs exposing (..)
+import Html exposing (Html, button, div, h2, input, p, text, textarea)
+import Html.Attributes exposing (class, cols, placeholder, rows, style, type_)
+import Html.Events exposing (onClick, onInput)
 import Models exposing (..)
+import Msgs exposing (..)
+import Regex exposing (regex, split)
 
 
 view : Model -> Html Msg
@@ -16,7 +16,7 @@ view { entry, action, authorization, passwordMessage } =
                 [ div [ class "row" ]
                     [ div [ class "col-xs-12" ]
                         [ div [ class "jumbotron" ]
-                            [ h2 [] [ text ("Five Hundo") ]
+                            [ h2 [] [ text "Five Hundo" ]
                             , textarea
                                 [ rows 25
                                 , cols 100
@@ -32,14 +32,16 @@ view { entry, action, authorization, passwordMessage } =
                 ]
 
         Checking ->
-            div [] []
+            div []
+                [ p [] [ text "checking..." ]
+                ]
 
         NotAuthorized ->
             div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
                 [ div [ class "row" ]
                     [ div [ class "col-xs-12" ]
                         [ div [ class "jumbotron" ]
-                            [ h2 [] [ text ("Five Hundo") ]
+                            [ h2 [] [ text "Five Hundo" ]
                             , input
                                 [ placeholder "Enter password..."
                                 , type_ "password"
@@ -92,12 +94,12 @@ wordCount body =
             split Regex.All (regex " |\n") body
     in
         List.filter isWord words
-            |> List.length
+        |> List.length
 
 
 isWord : String -> Bool
 isWord string =
-    case String.trim (string) of
+    case String.trim string of
         "" ->
             False
 

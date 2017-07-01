@@ -4,7 +4,6 @@ import Msgs exposing (..)
 import Models exposing (..)
 import Commands exposing (..)
 import Debounce exposing (Debounce)
-import Time exposing (second)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

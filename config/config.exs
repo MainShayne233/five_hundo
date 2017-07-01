@@ -3,6 +3,7 @@ use Mix.Config
 config :five_hundo,
   timezone: "America/New_York",
   cutoff_time: {5, 0, :AM},
+  start_day: "Monday",
   word_count_goal: 500
 
 config :five_hundo,
