@@ -64,7 +64,7 @@ update msg model =
                     )
 
                 other ->
-                    ( model
+                    ( { model | authorization = NotAuthorized }
                     , Cmd.none
                     )
 
