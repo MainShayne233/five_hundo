@@ -20,7 +20,7 @@ defmodule FiveHundo.DateTime do
   def last_n_dates(n) when n < 1, do: []
   def last_n_dates(n) do
     today = current_working_date()
-    (1..n)
+    (0..(n - 1))
     |> Enum.map(fn days_back -> 
       today
       |> Calendar.DateTime.subtract!(days_back * days())
