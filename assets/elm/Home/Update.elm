@@ -56,22 +56,31 @@ update msg model =
             )
 
         SessionResponse (Ok response) ->
-            case response of
-                "authorized" ->
+            case response.authorized of
+                True ->
+                  let _ =
+                      Debug.log "Hello Elm!"
+                  in
                     ( { model | authorization = Authorized }
                     , fetchEntry
                     )
 
+
                 other ->
-                    ( { model | authorization = NotAuthorized }
+                  let _ =
+                      Debug.log "Hello Elm!"
+                  in
+                    ( { model | authorization = Authorized }
                     , Cmd.none
                     )
 
         SessionResponse (Err response) ->
-            ( { model | entry = response |> toString }
-            , Cmd.none
-            )
-
+                  let _ =
+                      Debug.log "Hello Elm!"
+                  in
+                    ( { model | authorization = NotAuthorized }
+                    , Cmd.none
+                    )
         PersistSuccess response ->
             let
                 ( debounce, cmd ) =

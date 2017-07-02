@@ -15,9 +15,13 @@ defmodule FiveHundo.Web.AuthorizationController do
 
   def session(conn, _params) do
     if authorized_session?(conn) do
-      json(conn, "authorized")
+      json(conn, %{
+        authorized: true,
+      })
     else
-      json(conn, "not authorized")
+      json(conn, %{
+        authorized: false,
+      })
     end
   end
 

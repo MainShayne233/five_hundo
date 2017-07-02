@@ -28,8 +28,12 @@ type alias Model =
     , passwordMessage : String
     }
 
+type alias AuthorizationResponse =
+    { authorized : Bool
+    , breakdown : Breakdown}
+
 type alias Breakdown =
-  List String
+  List Entry
 
 type alias Entry =
     String

@@ -4,6 +4,7 @@ import Html exposing (program, Html)
 import View exposing (view)
 import Models exposing (init)
 import Update exposing (update)
+import Debug
 
 
 -- APP

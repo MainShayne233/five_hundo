@@ -47,6 +47,11 @@ type alias EntryResponse =
     { entry : String, breakdown : List String }
 
 
+type alias AuthorizationResponse =
+    { authorized : Bool
+    , breakdown : List String}
+
+
 stringListDecoder : Decoder (List String)
 stringListDecoder =
     Decode.list Decode.string
@@ -57,6 +62,14 @@ entryDecoder =
     decode EntryResponse
         |> required "entry" Decode.string
         |> required "breakdown" stringListDecoder
+
+
+authorizationResponseDecoder : Decoder AuthorizationResponse
+authorizationResponseDecoder =
+    decode AuthorizationResponse
+        |> required "authorized" Decode.bool
+        |> required "breakdown" stringListDecoder 
+
 
 
 
@@ -76,7 +89,7 @@ checkIfAuthorized : Cmd Msg
 checkIfAuthorized =
     let
         request =
-            Http.get "/api/authorization/session" Decode.string
+            Http.get "/api/authorization/session" authorizationResponseDecoder
     in
         Http.send SessionResponse request
 
