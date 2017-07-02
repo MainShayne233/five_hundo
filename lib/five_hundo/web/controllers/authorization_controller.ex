@@ -1,35 +1,50 @@
 defmodule FiveHundo.Web.AuthorizationController do
   use FiveHundo.Web, :controller
-  alias FiveHundo.Auth
+  alias FiveHundo.{Auth, Entry}
 
   def authorize(conn, %{"password" => password}) do
     if Auth.correct_password?(password) do
       conn
       |> Plug.Conn.fetch_session
       |> Plug.Conn.put_session(:authorized, true)
-      |> json("authorized")
+      |> json(authorized_payload())
     else
-      json conn, "not authorized"
+      json(conn, not_authorized_payload())
     end
   end
+
 
   def session(conn, _params) do
     if authorized_session?(conn) do
-      json(conn, %{
-        authorized: true,
-      })
+      json(conn, authorized_payload())
     else
-      json(conn, %{
-        authorized: false,
-      })
+      json(conn, not_authorized_payload())
     end
   end
 
-  def authorized_session?(conn) do
+
+  defp authorized_session?(conn) do
     conn
     |> Plug.Conn.fetch_session
     |> Plug.Conn.get_session(:authorized)
-    |> Kernel.!=(nil)
+    |> Kernel.==(true)
   end
 
+
+  defp authorized_payload do
+    %{
+      authorized: true,
+      breakdown: [],
+      entry: Entry.todays_entry(),
+    }
+  end
+
+
+  defp not_authorized_payload do
+    %{
+      authorized: false,
+      breakdown: [],
+      entry: "",
+    }
+  end
 end

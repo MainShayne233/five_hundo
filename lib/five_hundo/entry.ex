@@ -37,14 +37,6 @@ defmodule FiveHundo.Entry do
   end
 
 
-  def for_today do
-    %{
-      entry: todays_entry(),
-      breakdown: breakdown(),
-    }
-  end
-
-
   def todays_entry do
     get_or_create_todays()
     |> Map.get(:text)

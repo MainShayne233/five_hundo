@@ -16,6 +16,7 @@ import Time exposing (second)
 -- APP
 
 
+main : Program Never Model Msg
 main =
     program
         { init = init
@@ -66,7 +67,8 @@ type alias EntryResponse =
 
 type alias AuthorizationResponse =
     { authorized : Bool
-    , breakdown : List String
+    , breakdown : Breakdown
+    , entry : Entry
     }
 
 
@@ -110,11 +112,10 @@ setIdleDebounceConfig =
 type Msg
     = Change String
     | PasswordChange String
-    | PasswordResponse (Result Http.Error String)
+    | PasswordResponse (Result Http.Error AuthorizationResponse)
     | SessionResponse (Result Http.Error AuthorizationResponse)
     | SubmitPassword String
     | PersistSuccess (Result Http.Error String)
-    | InitialEntry (Result Http.Error { entry : String, breakdown : List String })
     | PersistDebounce Debounce.Msg
     | SetIdleDebounce Debounce.Msg
     | PersistEntry String
@@ -160,31 +161,16 @@ stringListDecoder =
     Decode.list Decode.string
 
 
-entryDecoder : Decoder EntryResponse
-entryDecoder =
-    decode EntryResponse
-        |> required "entry" Decode.string
-        |> required "breakdown" stringListDecoder
-
-
 authorizationResponseDecoder : Decoder AuthorizationResponse
 authorizationResponseDecoder =
     decode AuthorizationResponse
         |> required "authorized" Decode.bool
         |> required "breakdown" stringListDecoder
+        |> required "entry" Decode.string
 
 
 
 -- HTTP
-
-
-fetchEntry : Cmd Msg
-fetchEntry =
-    let
-        request =
-            Http.get "/api/entries/today" entryDecoder
-    in
-    Http.send InitialEntry request
 
 
 checkIfAuthorized : Cmd Msg
@@ -205,16 +191,16 @@ submitPassword password =
     Http.send PasswordResponse (submitPasswordRequest password)
 
 
-submitPasswordRequest : String -> Http.Request String
+submitPasswordRequest : String -> Http.Request AuthorizationResponse
 submitPasswordRequest password =
     let
         encodedPassword =
             encodePassword password
     in
-    post
+    Http.post
         "/api/authorization/authorize"
         (Http.stringBody "application/json" <| Encode.encode 0 <| encodedPassword)
-        Decode.string
+        authorizationResponseDecoder
 
 
 postEntry : String -> Cmd Msg
@@ -241,16 +227,6 @@ postEntryRequest entry =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        InitialEntry (Ok { entry, breakdown }) ->
-            ( { model | entry = entry, breakdown = breakdown }
-            , Cmd.none
-            )
-
-        InitialEntry (Err response) ->
-            ( { model | entry = "" }
-            , Cmd.none
-            )
-
         Change body ->
             let
                 ( debounce, cmd ) =
@@ -271,10 +247,13 @@ update msg model =
             )
 
         PasswordResponse (Ok response) ->
-            case response of
-                "authorized" ->
-                    ( { model | authorization = Authorized }
-                    , fetchEntry
+            case response.authorized of
+                True ->
+                    ( { model
+                        | authorization = Authorized
+                        , entry = response.entry
+                      }
+                    , Cmd.none
                     )
 
                 other ->
@@ -283,6 +262,10 @@ update msg model =
                     )
 
         PasswordResponse (Err response) ->
+            let
+                _ =
+                    Debug.log "PasswwordResponse Err" response
+            in
             ( { model | entry = response |> toString }
             , Cmd.none
             )
@@ -290,27 +273,22 @@ update msg model =
         SessionResponse (Ok response) ->
             case response.authorized of
                 True ->
-                    let
-                        _ =
-                            Debug.log "Hello Elm!"
-                    in
-                    ( { model | authorization = Authorized }
-                    , fetchEntry
+                    ( { model
+                        | authorization = Authorized
+                        , entry = response.entry
+                      }
+                    , Cmd.none
                     )
 
-                other ->
-                    let
-                        _ =
-                            Debug.log "Hello Elm!"
-                    in
-                    ( { model | authorization = Authorized }
+                False ->
+                    ( { model | authorization = NotAuthorized }
                     , Cmd.none
                     )
 
         SessionResponse (Err response) ->
             let
                 _ =
-                    Debug.log "Hello Elm!"
+                    Debug.log "SessionResponse Err" response
             in
             ( { model | authorization = NotAuthorized }
             , Cmd.none
