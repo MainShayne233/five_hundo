@@ -45,6 +45,7 @@ type Authorization
 type alias Model =
     { entry : Entry
     , breakdown : Breakdown
+    , currentBreakdownIndex : BreakdownIndex
     , persistDebounce : Debounce String
     , setIdleDebounce : Debounce String
     , action : Action
@@ -55,6 +56,10 @@ type alias Model =
 
 type alias Breakdown =
     List Entry
+
+
+type alias BreakdownIndex =
+    Int
 
 
 type alias Entry =
@@ -68,6 +73,7 @@ type alias EntryResponse =
 type alias AuthorizationResponse =
     { authorized : Bool
     , breakdown : Breakdown
+    , currentBreakdownIndex : BreakdownIndex
     , entry : Entry
     }
 
@@ -76,6 +82,7 @@ model : Model
 model =
     { entry = ""
     , breakdown = []
+    , currentBreakdownIndex = 0
     , persistDebounce = Debounce.init
     , setIdleDebounce = Debounce.init
     , action = Idle
@@ -166,6 +173,7 @@ authorizationResponseDecoder =
     decode AuthorizationResponse
         |> required "authorized" Decode.bool
         |> required "breakdown" stringListDecoder
+        |> required "current_breakdown_index" Decode.int
         |> required "entry" Decode.string
 
 
@@ -252,6 +260,8 @@ update msg model =
                     ( { model
                         | authorization = Authorized
                         , entry = response.entry
+                        , breakdown = response.breakdown
+                        , currentBreakdownIndex = response.currentBreakdownIndex
                       }
                     , Cmd.none
                     )
@@ -276,6 +286,8 @@ update msg model =
                     ( { model
                         | authorization = Authorized
                         , entry = response.entry
+                        , breakdown = response.breakdown
+                        , currentBreakdownIndex = response.currentBreakdownIndex
                       }
                     , Cmd.none
                     )

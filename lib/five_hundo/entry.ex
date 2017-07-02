@@ -52,10 +52,21 @@ defmodule FiveHundo.Entry do
   end
 
 
-  def breakdown do
-    DateTime.current_week()
-    |> Enum.map(&get_by/1)
-    |> Enum.map(&entry_grade/1)
+  def breakdown_and_index do
+    week = DateTime.current_week()
+
+    breakdown =
+      week
+      |> Enum.map(&get_by/1)
+      |> Enum.map(&entry_grade/1)
+
+    index =
+      week
+      |> Enum.find_index(fn day -> 
+        day == DateTime.current_working_day() 
+      end)
+
+    {breakdown, index}
   end
 
 
