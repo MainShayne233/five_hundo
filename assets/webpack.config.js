@@ -13,7 +13,10 @@ const prodPlugins = [
     __PROD: prod,
     __DEV: env === 'dev'
   }),
-  new CopyWebpackPlugin([{from: "./assets"}]),
+  new CopyWebpackPlugin([{
+    from: path.join(__dirname, 'static'),
+    to: path.join(__dirname, '..', 'priv', 'static'),
+  }]),
   new ExtractTextPlugin("css/styles.css"),
   new WriteFilePlugin(),
 ]
