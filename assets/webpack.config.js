@@ -39,11 +39,11 @@ const entry = path.join(__dirname, 'js', 'main.js')
 const hot = 'webpack-dev-server/client?http://localhost:4002'
 
 const elmLoaderOptions = {
-  pathToMake: '/usr/local/bin/elm-make',
+  pathToMake: './node_modules/.bin/elm-make',
   cwd: prod ? 'assets' : '.',
-  verbose: true,
-  debug: true,
-  warn: true,
+  verbose: !prod,
+  debug: !prod,
+  warn: !prod,
 }
 
 const config = {
