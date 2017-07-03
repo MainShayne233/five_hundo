@@ -40,6 +40,7 @@ defmodule FiveHundo.Entry do
   def todays_entry do
     get_or_create_todays()
     |> Map.get(:text)
+    |> Kernel.||("")
   end
 
 
@@ -52,25 +53,28 @@ defmodule FiveHundo.Entry do
   end
 
 
-  def breakdown_and_index do
-    week = DateTime.current_week()
-
-    breakdown =
-      week
-      |> Enum.map(&get_by/1)
-      |> Enum.map(&entry_grade/1)
-
-    index =
-      week
-      |> Enum.find_index(fn day -> 
-        day == DateTime.current_working_day() 
-      end)
-
-    {breakdown, index}
+  def breakdown(
+    breakdown \\ [],
+    days \\ DateTime.current_week(),
+    current_day  \\ DateTime.current_working_day(),
+    current_state \\ "past")
+  def breakdown(breakdown, [], _current_day, _current_state), do: breakdown
+  def breakdown(breakdown, [day | rest], current_day, _current_state) when day == current_day do
+    grade = day |> get_by |> entry_grade
+    breakdown
+    |> Enum.concat([%{grade: grade, status: "present"}])
+    |> breakdown(rest, current_day, "future")
+  end
+  def breakdown(breakdown, [day | rest], current_day, current_state) do
+    grade = day |> get_by |> entry_grade
+    breakdown
+    |> Enum.concat([%{grade: grade, status: current_state}])
+    |> breakdown(rest, current_day, current_state)
   end
 
 
   defp entry_grade(nil), do: "gutter"
+  defp entry_grade(%__MODULE__{word_count: 0}), do: "gutter"
   defp entry_grade(%__MODULE__{word_count: nil}), do: "gutter"
   defp entry_grade(%__MODULE__{word_count: word_count}) do
     if word_count < word_count_goal() do

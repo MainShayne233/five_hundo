@@ -1,8 +1,8 @@
 module Main exposing (..)
 
 import Debounce exposing (Debounce)
-import Html exposing (Html, button, div, h2, input, p, program, text, textarea)
-import Html.Attributes exposing (class, cols, placeholder, rows, style, type_)
+import Html exposing (Html, button, div, h2, img, input, p, program, text, textarea)
+import Html.Attributes exposing (class, cols, placeholder, rows, src, style, type_)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (post)
 import Json.Decode as Decode exposing (Decoder)
@@ -42,10 +42,23 @@ type Authorization
     | Checking
 
 
+type DayGrade
+    = Gutter
+    | Spare
+    | Strike
+    | NoGrade
+
+
+type DayStatus
+    = Past
+    | Present
+    | Future
+    | NoStatus
+
+
 type alias Model =
     { entry : Entry
-    , breakdown : Breakdown
-    , currentBreakdownIndex : BreakdownIndex
+    , breakdown : WeekBreakdown
     , persistDebounce : Debounce String
     , setIdleDebounce : Debounce String
     , action : Action
@@ -54,12 +67,14 @@ type alias Model =
     }
 
 
-type alias Breakdown =
-    List Entry
+type alias WeekBreakdown =
+    List DayBreakdown
 
 
-type alias BreakdownIndex =
-    Int
+type alias DayBreakdown =
+    { grade : DayGrade
+    , status : DayStatus
+    }
 
 
 type alias Entry =
@@ -67,13 +82,19 @@ type alias Entry =
 
 
 type alias EntryResponse =
-    { entry : Entry, breakdown : Breakdown }
+    { entry : Entry
+    , breakdown : WeekBreakdown
+    }
+
+
+type alias PostEntryResponse =
+    { breakdown : WeekBreakdown
+    }
 
 
 type alias AuthorizationResponse =
     { authorized : Bool
-    , breakdown : Breakdown
-    , currentBreakdownIndex : BreakdownIndex
+    , breakdown : WeekBreakdown
     , entry : Entry
     }
 
@@ -82,7 +103,6 @@ model : Model
 model =
     { entry = ""
     , breakdown = []
-    , currentBreakdownIndex = 0
     , persistDebounce = Debounce.init
     , setIdleDebounce = Debounce.init
     , action = Idle
@@ -122,7 +142,7 @@ type Msg
     | PasswordResponse (Result Http.Error AuthorizationResponse)
     | SessionResponse (Result Http.Error AuthorizationResponse)
     | SubmitPassword String
-    | PersistSuccess (Result Http.Error String)
+    | PersistSuccess (Result Http.Error PostEntryResponse)
     | PersistDebounce Debounce.Msg
     | SetIdleDebounce Debounce.Msg
     | PersistEntry String
@@ -163,6 +183,12 @@ encodePassword password =
 -- DECODERS
 
 
+postEntryResponseDecoder : Decoder PostEntryResponse
+postEntryResponseDecoder =
+    decode PostEntryResponse
+        |> required "breakdown" weekBreakdownDecoder
+
+
 stringListDecoder : Decoder (List String)
 stringListDecoder =
     Decode.list Decode.string
@@ -172,9 +198,73 @@ authorizationResponseDecoder : Decoder AuthorizationResponse
 authorizationResponseDecoder =
     decode AuthorizationResponse
         |> required "authorized" Decode.bool
-        |> required "breakdown" stringListDecoder
-        |> required "current_breakdown_index" Decode.int
+        |> required "breakdown" weekBreakdownDecoder
         |> required "entry" Decode.string
+
+
+weekBreakdownDecoder : Decoder WeekBreakdown
+weekBreakdownDecoder =
+    Decode.list dayBreakdownDecoder
+
+
+dayBreakdownDecoder : Decoder DayBreakdown
+dayBreakdownDecoder =
+    decode DayBreakdown
+        |> required "grade" dayGradeDecoder
+        |> required "status" dayStatusDecoder
+
+
+dayGradeDecoder : Decoder DayGrade
+dayGradeDecoder =
+    stringToTypeDecoder decodeDayGrade
+
+
+dayStatusDecoder : Decoder DayStatus
+dayStatusDecoder =
+    stringToTypeDecoder decodeDayStatus
+
+
+stringToTypeDecoder : (String -> a) -> Decoder a
+stringToTypeDecoder decoder =
+    Decode.string
+        |> Decode.andThen (doStringToTypeDecoding decoder)
+
+
+doStringToTypeDecoding : (String -> a) -> String -> Decoder a
+doStringToTypeDecoding decoder string =
+    Decode.succeed (decoder string)
+
+
+decodeDayGrade : String -> DayGrade
+decodeDayGrade dayGrade =
+    case dayGrade of
+        "gutter" ->
+            Gutter
+
+        "spare" ->
+            Spare
+
+        "strike" ->
+            Strike
+
+        _ ->
+            NoGrade
+
+
+decodeDayStatus : String -> DayStatus
+decodeDayStatus dayStatus =
+    case dayStatus of
+        "past" ->
+            Past
+
+        "present" ->
+            Present
+
+        "future" ->
+            Future
+
+        _ ->
+            NoStatus
 
 
 
@@ -216,7 +306,7 @@ postEntry entry =
     Http.send PersistSuccess (postEntryRequest entry)
 
 
-postEntryRequest : String -> Http.Request String
+postEntryRequest : String -> Http.Request PostEntryResponse
 postEntryRequest entry =
     let
         encodedEntry =
@@ -225,7 +315,7 @@ postEntryRequest entry =
     post
         "/api/entries/save"
         (Http.stringBody "application/json" <| Encode.encode 0 <| encodeEntry entry)
-        Decode.string
+        postEntryResponseDecoder
 
 
 
@@ -261,7 +351,6 @@ update msg model =
                         | authorization = Authorized
                         , entry = response.entry
                         , breakdown = response.breakdown
-                        , currentBreakdownIndex = response.currentBreakdownIndex
                       }
                     , Cmd.none
                     )
@@ -276,7 +365,7 @@ update msg model =
                 _ =
                     Debug.log "PasswwordResponse Err" response
             in
-            ( { model | entry = response |> toString }
+            ( model
             , Cmd.none
             )
 
@@ -287,7 +376,6 @@ update msg model =
                         | authorization = Authorized
                         , entry = response.entry
                         , breakdown = response.breakdown
-                        , currentBreakdownIndex = response.currentBreakdownIndex
                       }
                     , Cmd.none
                     )
@@ -306,13 +394,22 @@ update msg model =
             , Cmd.none
             )
 
-        PersistSuccess response ->
+        PersistSuccess (Ok response) ->
             let
                 ( debounce, cmd ) =
                     Debounce.push setIdleDebounceConfig "" model.setIdleDebounce
             in
-            ( { model | setIdleDebounce = debounce }
+            ( { model | setIdleDebounce = debounce, breakdown = response.breakdown }
             , cmd
+            )
+
+        PersistSuccess (Err response) ->
+            let
+                _ =
+                    Debug.log "PersistSuccess Err" response
+            in
+            ( model
+            , Cmd.none
             )
 
         PersistDebounce msg ->
@@ -357,7 +454,7 @@ update msg model =
 
 
 view : Model -> Html Msg
-view { entry, action, authorization, passwordMessage } =
+view { entry, action, authorization, passwordMessage, breakdown } =
     case authorization of
         Authorized ->
             div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
@@ -365,6 +462,7 @@ view { entry, action, authorization, passwordMessage } =
                     [ div [ class "col-xs-12" ]
                         [ div [ class "jumbotron" ]
                             [ h2 [] [ text "Five Hundo" ]
+                            , renderBreakdown breakdown
                             , textarea
                                 [ rows 25
                                 , cols 100
@@ -402,6 +500,44 @@ view { entry, action, authorization, passwordMessage } =
                         ]
                     ]
                 ]
+
+
+renderBreakdown : WeekBreakdown -> Html Msg
+renderBreakdown weekBreakdown =
+    div [ flexboxContainerStyle ]
+        (List.map renderDayBreakdown weekBreakdown)
+
+
+renderDayBreakdown : DayBreakdown -> Html Msg
+renderDayBreakdown dayBreakdown =
+    div [ flexboxChildStyle ]
+        [ dayBreakdownImage dayBreakdown ]
+
+
+dayBreakdownImage : DayBreakdown -> Html Msg
+dayBreakdownImage dayBreakdown =
+    case dayBreakdown.status of
+        Future ->
+            img [ src "/images/future.png" ] []
+
+        _ ->
+            img [ src (imageSrcForDayBreakdown dayBreakdown), styleForDayBreakdown dayBreakdown ] []
+
+
+imageSrcForDayBreakdown : DayBreakdown -> String
+imageSrcForDayBreakdown { grade } =
+    case grade of
+        Gutter ->
+            "/images/gutter.png"
+
+        Spare ->
+            "/images/spare.png"
+
+        Strike ->
+            "/images/strike.png"
+
+        NoGrade ->
+            ""
 
 
 actionLabel : Action -> Html Msg
@@ -453,3 +589,42 @@ isWord string =
 
         anything ->
             True
+
+
+
+-- STYLES
+
+
+styleForDayBreakdown : DayBreakdown -> Html.Attribute msg
+styleForDayBreakdown { status } =
+    case status of
+        Present ->
+            List.concat [ gradeBaseStyle, [ ( "border-style", "solid" ) ] ]
+                |> style
+
+        other ->
+            style gradeBaseStyle
+
+
+gradeBaseStyle : List ( String, String )
+gradeBaseStyle =
+    [ ( "height", "50px" )
+    , ( "width", "50px" )
+    ]
+
+
+flexboxContainerStyle : Html.Attribute msg
+flexboxContainerStyle =
+    style
+        [ ( "display", "flex" )
+        , ( "flex-direction", "row" )
+        , ( "align-items", "center" )
+        , ( "justify-content", "center" )
+        ]
+
+
+flexboxChildStyle : Html.Attribute msg
+flexboxChildStyle =
+    style
+        [ ( "flex", "0.07" )
+        ]

@@ -83,6 +83,13 @@ const config = {
   },
   module: {
     rules: [
+    {
+      test: /\.(jpg|png|svg)$/,
+      loader: 'url-loader',
+       options: {
+        limit: 25000,
+      },
+    },
       {
         test: /\.scss$/,
         use: [
@@ -92,7 +99,6 @@ const config = {
         ],
       },
       {
-
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
         use: [

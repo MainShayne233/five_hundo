@@ -5,6 +5,6 @@ defmodule FiveHundo.Web.EntriesController do
 
   def save(conn, %{"entry" => text}) do
     Entry.update_todays_text(text)
-    json conn, "success"
+    json conn, %{breakdown: Entry.breakdown()}
   end
 end

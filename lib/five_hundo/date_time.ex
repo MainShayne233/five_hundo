@@ -4,7 +4,7 @@ defmodule FiveHundo.DateTime do
     current_working_date()
     |> to_simple_date
   end
-  
+
 
   def current_working_date do
     timezone()
@@ -24,7 +24,7 @@ defmodule FiveHundo.DateTime do
   def last_n_dates(n) do
     today = current_working_date()
     (0..(n - 1))
-    |> Enum.map(fn days_back -> 
+    |> Enum.map(fn days_back ->
       today
       |> Calendar.DateTime.subtract!(days_back * one_day())
     end)
@@ -87,7 +87,7 @@ defmodule FiveHundo.DateTime do
   defp to_simple_date(date) do
     date
     |> Calendar.DateTime.to_date
-    |> Map.take([:day, :month, :year]) 
+    |> Map.take([:day, :month, :year])
   end
 
 

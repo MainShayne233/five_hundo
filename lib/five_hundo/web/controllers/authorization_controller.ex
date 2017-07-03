@@ -32,11 +32,9 @@ defmodule FiveHundo.Web.AuthorizationController do
 
 
   defp authorized_payload do
-    {breakdown, current_breakdown_index} = Entry.breakdown_and_index()
     %{
       authorized: true,
-      breakdown: breakdown,
-      current_breakdown_index: current_breakdown_index,
+      breakdown: Entry.breakdown(),
       entry: Entry.todays_entry(),
     }
   end
@@ -46,7 +44,6 @@ defmodule FiveHundo.Web.AuthorizationController do
     %{
       authorized: false,
       breakdown: [],
-      current_breakdown_index: -1,
       entry: "",
     }
   end
