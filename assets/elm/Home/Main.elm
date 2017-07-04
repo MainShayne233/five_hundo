@@ -518,7 +518,7 @@ dayBreakdownImage : DayBreakdown -> Html Msg
 dayBreakdownImage dayBreakdown =
     case dayBreakdown.status of
         Future ->
-            img [ src "/images/future.png" ] []
+            img [ src "/images/future.png", styleForDayBreakdown dayBreakdown ] []
 
         _ ->
             img [ src (imageSrcForDayBreakdown dayBreakdown), styleForDayBreakdown dayBreakdown ] []
