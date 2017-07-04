@@ -479,7 +479,7 @@ view { entry, action, authorization, passwordMessage, breakdown } =
 
         Checking ->
             div []
-                [ p [] [ text "checking..." ]
+                [ p [] []
                 ]
 
         NotAuthorized ->
